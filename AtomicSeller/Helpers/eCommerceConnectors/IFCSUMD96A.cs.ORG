@@ -1,0 +1,234 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Web;
+using AtomicSeller.ViewModels;
+
+namespace AtomicSeller.Helpers.eCommerceConnectors
+{
+    public class IFCSUMD96A
+    {
+
+        string filePath = "C:/toto.txt";
+        public void IFCSUMD96A_AddHeaderToFile(DEALVM _DEALVM)
+        {
+
+            // Add header
+
+            UNA _UNA = new IFCSUMD96A.UNA();
+            _UNA.Segment = "UNA";
+            _UNA.Record = ":+.? '";
+            AppendObjectToEDIFile(_UNA, typeof(UNA), filePath, "");
+
+            UNB _UNB = new IFCSUMD96A.UNB();
+            _UNA.Segment = "UNB";
+            _UNA.Record = "";
+            AppendObjectToEDIFile(_UNB, typeof(UNB), filePath, "");
+
+            UNH _UNH = new IFCSUMD96A.UNH();
+            _UNH.Segment = "UNH";
+            _UNH.Record = "+1+IFCSUM:D:96A:UN'";
+            AppendObjectToEDIFile(_UNH, typeof(UNH), filePath, "");
+
+            /* Add sender
+             
+            BGM + 610 + 000001'
+            RFF + ADE:85000001'
+            TDT + 20'
+            NAD + CZ + 12345678911111++NOM 1 EXPEDITEUR: NOM 2 EXPEDITEUR: NOM 3 EXPEDITEUR + ADRESSE 1 EXPEDITEUR: ADRESSE 2 EXPEDITEUR: ADRESSE 3 EXPEDITEUR + VILLE++00001 + FR'
+
+            NAD + CA + 31179945600001++AGENCE SCHENKER FRANCE'
+            CNI + 1 + 00000001'
+            FTX + DEL++ + INSTRUCTIONS DE LIVRAISON'
+            TOD + 6 + P'
+            RFF + CU:REFERENCE EXPEDITEUR NATIONAL'
+            */
+        }
+
+        public void IFCSUMD96A_AddDEALVMToFile(DEALVM _DEALVM)
+        {
+            /* Add Recipient
+             NAD+CN+++NOM 1 DESTINATAIRE:NOM 2 DESTINATAIRE:NOM 3 DESTINATAIRE+ADRESSE 1 DESTINATAIRE:ADRESSE 2 DESTINATAIRE:ADRESSE 3 DESTINATAIRE+VILLE++85000+FR'
+CTA++:CONTACT DESTINATAIRE'
+COM+0251452062:TE'
+GID+1+1:EP'
+MEA+WT+AAE+KGM:10.000'
+PCI+18'
+GIN+BN+*8585221126385000000000001001300'
+CNI+2+00000002'
+FTX+AAA+++NATURE DE MARCHANDISE'
+FTX+DEL+++INSTRUCTIONS DE LIVRAISON'
+TOD+6++DAP'
+RFF+CU:REFERENCE EXPEDITEUR INTERNATIONAL'
+RFF+ADE:85000060'
+            */
+
+        }
+
+        public void IFCSUMD96A_AddFooterToFile(DEALVM _DEALVM)
+        {
+
+            // Add footer
+
+            UNZ _UNZ = new IFCSUMD96A.UNZ();
+            _UNZ.Segment = "UNZ";
+            _UNZ.Record = "+1+99999'";
+
+            AppendObjectToEDIFile(_UNZ, typeof(UNZ), filePath, "");
+
+        }
+
+        public void AppendObjectToEDIFile(object _Record, Type RecordType, string path, string Delimiter)
+        {
+
+            var props = RecordType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+
+            using (StreamWriter w = File.AppendText(path))
+            {
+                string _LineBuffer = string.Join(Delimiter, props.Select(p => p.GetValue(_Record, null)));
+
+                // Get rid of unwanted characters
+
+                switch (Delimiter)
+                {
+                    case "\t":
+                        _LineBuffer = Regex.Replace(_LineBuffer, @"\n|\r", "");
+                        break;
+                    case "\n":
+                        _LineBuffer = Regex.Replace(_LineBuffer, @"\t|\r", "");
+                        break;
+                    case "\r":
+                        _LineBuffer = Regex.Replace(_LineBuffer, @"\t|\n", "");
+                        break;
+                    default:
+                        _LineBuffer = Regex.Replace(_LineBuffer, @"\t|\n|\r", "");
+                        break;
+                }
+
+                w.WriteLine(_LineBuffer);
+            }
+        }
+
+
+
+        public class BGM
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class CNI
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class COM
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class CTA
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class FTX
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class GID
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class GIN
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class MEA
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class NAD
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class PCI
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class RFF
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class TDT
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class TOD
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class UNA
+        {
+            public string Segment { get; set; }
+            public string Record { get; set; }
+
+        }
+
+        public class UNB
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class UNH
+        {
+            public string Segment { get; set; }
+            public string Record { get; set; }
+
+        }
+
+        public class UNT
+        {
+            public string Segment { get; set; }
+
+        }
+
+        public class UNZ
+        {
+            public string Segment { get; set; }
+            public string Record { get; set; }
+
+        }
+
+
+
+    }
+
+
+}
